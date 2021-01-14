@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>添加博客</title>
+  		<link href="../editormd/css/editormd.css" rel="stylesheet" />
+  		<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  		<link href="../css/blog.css" rel="stylesheet">
+  		<!--<link href="../css/sweetalert.css" rel="stylesheet">-->
+	</head>
+	<body>
+		<div>
+			<a href="index.html" class="a-back"><<首页</a>
+		 	<input type="text" id="title" name="title" class="blog-title" placeholder="请输入文章标题" />
+		 	<select id="category">
+    			<option value="Java">Java</option>
+    			<option value="大数据">大数据</option>
+    			<option value="数据结构">数据结构</option>
+    			<option value="其他">其他</option>
+			</select>
+		 	<button type="submit" class="btn btn-primary" onclick="addBlog();">发布文章</button>
+		 	
+		 </div>
+		<form method="post" enctype="multipart/form-data" id="info_form">
+		<div id="my-editormd" >
+			<textarea id="my-editormd-markdown-doc" name="my-editormd-markdown-doc" style="display:none;"></textarea>
+			<!-- 注意：name属性的值-->
+			<textarea id="my-editormd-html-code" name="my-editormd-html-code" style="display:none;"></textarea>
+		</div>
+		</form>
+		
+		  
+  		 <script src="../editormd/examples/js/jquery.min.js"></script>
+  		 <script src="../editormd/lib/editormd.min.js"></script>
+  		 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  		 <!--<script src="../js/sweetalert.min.js"></script>-->
+  		 <script type="text/javascript">
+  		 	var userId=false;
+  			$(function() {
+  				getUser();
+  				getCategory();
+      			editormd("my-editormd", {//注意1：这里的就是上面的DIV的id属性值
+         		width   : "90%",
+          		height  : 640,
+          		syncScrolling : "single",
+          		path    : "../editormd/lib/",//注意2：你的路径
+          		saveHTMLToTextarea : true,//注意3：这个配置，方便post提交表单
+          		
+          		 /**上传图片相关配置如下*/
+         		imageUpload : true,
+         		imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+         		imageUploadURL : "http://127.0.0.1:8080/blog/article/images",//注意你后端的上传图片服务地址
+      			crossDomainUpload : true,
+           //     uploadCallbackURL : "http://127.0.0.1:8020/Blog/html/blog-add.html"
+      		//	uploadCallbackURL : blog-add.html,
+      			});
+ 			});
+ 			 
+ 			function getCategory(){
+ 				$("#category").empty();
+  	 			var jsonData = {
+					"userId" : userId,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/category/all",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+						console.log(result);
+						var length=result.classifyList.length;
+						var categoryItem="";
+						for(var i=0;i<length;i++){
+							categoryItem=categoryItem+"<option value='"+result.classifyList[i].id+"'>"+result.classifyList[i].name+"</option>";
+						}
+						$("#category").append(categoryItem);
+						}else {
+							swal("查找失败!", result.msg, "error");
+						}
+
+					}
+
+				});	
+ 			}
+ 			
+ 			 
+ 			function addBlog(){
+ 				console.log("开始添加博客");
+ 				var title=$("#title").val();
+ 				if(title==""){
+ 					swal("提交失败!", "文章标题不能为空!", "error");
+ 					return false;
+ 				}
+ 				var len=title.length;
+ 				if(len>100){
+ 					swal("提交失败!", "文章标题不能超过100个字符!", "error");
+ 				}else{
+ 					var content=$("#my-editormd-html-code").val();
+ 					var classifyid=$("#category").val();
+ 					var jsonData = {
+ 						"title" : title,
+ 						"content" : content,
+ 						"userid" : userId,
+						"classifyid" : classifyid,
+					};
+					$.ajax({
+						xhrFields: {
+      						 withCredentials: false    // 前端设置是否带cookie
+   						},
+   					crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/article/add",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							swal("成功!", "添加博客成功!", "success");
+							$('button, .confirm').click(function () {
+        						window.location.reload();
+							})
+						}else {
+							swal("失败!", "添加博客失败!", "error");
+						}
+					}
+				});	
+ 				}
+ 			}
+ 			 
+ 			function getUser(){
+  	 			$.ajax({
+					xhrFields: {
+      					 withCredentials: true  
+   					},
+   				crossDomain: true,
+   				async: false,              //ajax执行同步操作
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/user/getId",
+				success : function(result) {
+					if (result.code == 200) {
+						userId=result.id;	
+					}else{
+						swal(result.msg,'点击进行登录', "error");
+						$('button, .confirm').click(function () {
+        					location.href = 'login.html'
+						})	
+					}
+				}
+
+				});
+  	 		} 
+ 			
+		</script>
+	</body>
+</html>

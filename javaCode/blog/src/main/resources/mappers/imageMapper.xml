@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.dao.ImageDao">
+	<resultMap id="imageMap" type="com.blog.entity.Image">
+		<id column="id" property="id"  />
+		<result column="url" property="url"  />
+		<result column="blogid" property="blogid"  />
+	</resultMap>
+	<!-- 统计用户的文章数量  -->
+	<select id="queryImageUrls" parameterType="int" resultType="String">
+		select url from image where blogid=#{blogid}
+	</select>
+	<!-- 删除指定博客的文章 -->
+	<delete id="deleteImages" parameterType="int">
+		delete from image where blogid=#{blogId}
+	</delete>
+	
+</mapper> 

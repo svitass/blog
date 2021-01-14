@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.dao.BlogDao">
+	<resultMap id="blogMap" type="com.blog.entity.BlogInfo">
+		<id column="id" property="id"  />
+		<result column="title" property="title"  />
+		<result column="time" property="time"  />
+		<result column="content" property="content"  />
+		<result column="remark_count" property="remarkCount"  />
+		<result column="scan_count" property="scanCount"  />
+		<result column="like_count" property="likeCount"  />
+		<result column="userid" property="userid"  />
+		<result column="classifyid" property="classifyid"  />
+	</resultMap>
+	<!-- 统计用户的文章数量  -->
+	<select id="countBlog" parameterType="int" resultType="int">
+		select count(*) from bloginfo where userid=#{userid}
+	</select>
+	<!-- 统计用户被点赞的数量 -->
+	<select id="countBlogLiked" parameterType="int" resultType="int">
+		select count(*) from bloginfo,bloglike where bloginfo.userid=#{userid} and bloginfo.id=bloglike.blogid
+	</select>
+	<!-- 查询指定用户的博客 -->
+	<select id="queryBlogsByUserid" parameterType="int" resultMap="blogMap">
+		select * from bloginfo where userid=#{userid}
+	</select>
+	<!-- 查询指定用户点赞的博客 -->
+	<select id="queryLikedBlogs" parameterType="int" resultMap="blogMap">
+		select bloginfo.* from bloginfo,bloglike where bloglike.userid=#{userid} and bloglike.blogid=bloginfo.id
+	</select>
+	<!-- 统计指定类别下的博客数量  -->
+	<select id="countBlogByClassify" parameterType="int" resultType="int">
+		select count(*) from bloginfo where classifyid=#{classifyid}
+	</select>
+	<!-- 查询指定类别下的博客  -->
+	<select id="queryBlogByClassify" parameterType="int" resultMap="blogMap">
+		select * from bloginfo where classifyid=#{classifyid}
+	</select>
+	<!-- 按照日期逆序查找博客  -->
+	<select id="queryBlogByDate" resultMap="blogMap">
+		select * from bloginfo order by time desc
+	</select>
+	<!-- 根据关键字查询博客 -->
+	<select id="queryBlogByKey" resultMap="blogMap">
+		select * from bloginfo where title like concat('%',#{key},'%')
+	</select>
+	<!-- 根据博客id查询博客 -->
+	<select id="queryBlogById" parameterType="int" resultMap="blogMap">
+		select * from bloginfo where id=#{id}
+	</select>
+	<!-- 增加指定博客访问量 -->
+	<update id="addScanCount" parameterType="int">
+		update bloginfo set scan_count=scan_count+1 where id=#{id}
+	</update>
+	<!-- 根据博客题目查询类似的博客 -->
+	<select id="queryBlogByTitle" resultMap="blogMap">
+		select * from bloginfo 
+		<where>
+			<if test="keys!=null">
+				<foreach collection="keys" item="key" open="(" close=")" separator="OR">
+					title LIKE '%${key}%'
+				</foreach>
+			</if> 
+		</where>
+		order by ABS(CHAR_LENGTH(title)-#{len})
+	</select>
+	<!-- 根据博客id删除博客信息 -->
+	<delete id="deleteBlogById" parameterType="int">
+		delete from bloginfo where id=#{blogId}
+	</delete>
+	<!-- 增加指定博客点赞量 -->
+	<update id="addLikeCount" parameterType="int">
+		update bloginfo set like_count=like_count+1 where id=#{blogId}
+	</update>
+	<!-- 减少指定博客点赞量 -->
+	<update id="decreaseLikeCount" parameterType="int">
+		update bloginfo set like_count=like_count-1 where id=#{blogId}
+	</update>
+	<!-- 增加指定博客评论量 -->
+	<update id="addRemarkCount" parameterType="int">
+		update bloginfo set remark_count=remark_count+1 where id=#{blogId}
+	</update>
+	<!-- 增加一条博客信息-->
+	<insert id="insertBlog" parameterType="com.blog.entity.BlogInfo">
+		insert into bloginfo(title,time,content,remark_count,scan_count,like_count,userid,classifyid) 
+			value(#{title},#{time},#{content},#{remarkCount},#{scanCount},#{likeCount},#{userid},#{classifyid})
+	</insert>
+	<!-- 增加指定博客信息 -->
+	<update id="updateBlog" parameterType="com.blog.entity.BlogInfo">
+		update bloginfo set title=#{title},content=#{content},classifyid=#{classifyid} where id=#{id}
+	</update>
+</mapper> 

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+<meta charset="utf-8">
+<title>Young Blog -- 登录</title>
+<link rel="stylesheet" href="../css/style.css">
+<!--<link rel="stylesheet" href="../sweetalert/src/sweetalert.css">-->
+</head>
+
+<body>
+    <div class="content">
+        <div class="form sign-in">
+            <h2>欢迎回来</h2>
+            <label>
+                <span>手机号</span>
+                <input type="text" id="loadphone"/>
+                <label id="loadphone-tip" class="tip">*手机号不能为空</label>
+            </label>
+            <label>
+                <span>密码</span>
+                <input type="password" id="loadpassword"/>
+                <label id="loadpwd-tip" class="tip">*密码不能为空</label>
+            </label>
+            <!--<p class="forgot-pass"><a href="javascript:">忘记密码？</a></p>-->
+            <button type="button" class="submit" onclick="load();">登 录</button>
+            <!--<button type="button" class="fb-btn">使用 <span>验证码</span> 帐号登录</button>-->
+        </div>
+        <div class="sub-cont">
+            <div class="img">
+                <div class="img__text m--up">
+                    <h2>还未注册？</h2>
+                    <p>立即注册，发现大量机会！</p>
+                </div>
+                <div class="img__text m--in">
+                    <h2>已有帐号？</h2>
+                    <p>有帐号就登录吧，好久不见了！</p>
+                </div>
+                <div class="img__btn">
+                    <span class="m--up">注 册</span>
+                    <span class="m--in">登 录</span>
+                </div>
+            </div>
+            <div class="form sign-up">
+                <h2>立即注册</h2>
+                <label>
+                    <span>用户名</span>
+                    <input type="text" id="username"/>
+                    <label id="name-tip" class="tip">*用户名不能为空</label>
+                </label>
+                <label>
+                    <span>手机号</span>
+                    <input type="text" id="phone"/>
+                    <label id="phone-tip" class="tip">*手机号不能为空</label>
+                </label>
+                <label>
+                    <span>密码</span>
+                    <input type="password" id="password"/>
+                    <label id="password-tip" class="tip">*密码不能为空</label>
+                </label>
+               <!-- <label>
+                    <span>验证码</span>
+                    <input type="text" />
+                </label>-->
+                <button type="button" class="submit" onclick="insert();">注 册</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script src="../layer_v2.1/layer/layer.js"></script>
+ 	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  	<!--<script src="../sweetalert/docs/assets/sweetalert/sweetalert.min.js"></script>-->
+	<script type="text/javascript">
+		//等价写法 $(function(){});
+		/*$(document).ready(function(){
+			
+		});*/
+		
+		
+		$("#username").bind('input propertychange', function()   //验证用户名
+		{
+  			var name=$("#username").val();
+			var length=name.length;
+			if(length==0){
+				$("#name-tip").text("*用户名不能为空");
+			}else if(length>16){
+				$("#name-tip").text("*用户名长度不能超过16个字符");
+			}else{
+				$("#name-tip").text("");
+			}
+		})
+		
+		$("#phone").bind('input propertychange', function()
+		{
+  			var phone=$("#phone").val();
+			var length=phone.length;
+			if(length==0){
+				$("#phone-tip").text("*手机号不能为空");
+			}else{
+				var myreg=/^[1][3,4,5,7,8][0-9]{9}$/;
+            	if (!myreg.test(phone)){     //手机号错误
+                	$("#phone-tip").text("*请输入正确的手机号");
+            	} else {     //手机号正确
+                	$("#phone-tip").text("");
+            	}
+			}
+		})
+		
+		$("#loadphone").bind('input propertychange', function()
+		{
+  			var phone=$("#loadphone").val();
+			var length=phone.length;
+			if(length==0){
+				$("#loadphone-tip").text("*手机号不能为空");
+			}else{
+				var myreg=/^[1][3,4,5,7,8][0-9]{9}$/;
+            	if (!myreg.test(phone)){     //手机号错误
+                	$("#loadphone-tip").text("*请输入正确的手机号");
+            	} else {     //手机号正确
+                	$("#loadphone-tip").text("");
+            	}
+			}
+		})
+		
+		
+		$("#password").bind('input propertychange', function()
+		{
+  			var password=$("#password").val();
+			var length=password.length;
+			if(length==0){
+				$("#password-tip").text("*密码不能为空");
+			}else if(length<6){
+				$("#password-tip").text("*密码长度不能小于6个字符");
+			}else if(length>20){
+				$("#password-tip").text("*密码长度不能大于20个字符");
+			}else{
+				$("#password-tip").text("");
+			}
+		})
+		
+		$("#loadpassword").bind('input propertychange', function()
+		{
+  			var password=$("#loadpassword").val();
+			var length=password.length;
+			if(length==0){
+				$("#loadpwd-tip").text("*密码不能为空");
+			}else if(length<6){
+				$("#loadpwd-tip").text("*密码长度不能小于6个字符");
+			}else if(length>20){
+				$("#loadpwd-tip").text("*密码长度不能大于20个字符");
+			}else{
+				$("#loadpwd-tip").text("");
+			}
+		})
+		
+		
+		function load(){
+			console.log("开始登陆...");
+			var phonetip=$("#loadphone-tip").text();
+			var phoneLen=phonetip.length;
+			var passwordtip=$("#loadpwd-tip").text();
+			var pwdLen=passwordtip.length;
+			if(phoneLen>0){
+				console.log("提交失败");
+				swal("提交失败!", "请输入正确的手机号", "error");
+			}else if(pwdLen>0){
+				swal("提交失败!", "请输入正确的密码", "error");
+			}else{
+				var phone = $("#loadphone").val();
+				var pwd = $("#loadpassword").val();
+				var jsonData = {
+					"phone" : phone,
+					"password": pwd,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: true  
+   					},
+   					crossDomain: true,   
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/login/load",
+					data : jsonData,
+					beforeSend : function() {
+						loadingIndex = layer.msg('处理中', {
+							icon : 16
+						});
+
+					},
+					success : function(result) {
+						layer.close(loadingIndex);
+						if (result.code == 200) {
+							window.location.href = "../html/index.html";
+						} else if (result.code == 300) {
+							layer.msg(result.msg, {
+								time : 2000,
+								icon : 5,
+								shift : 6
+							});
+						} else {
+							swal("登陆失败!", result.msg, "error");
+						//	alert(result.msg);
+						}
+
+					}
+
+				});
+			}
+			
+		}
+		
+		function insert() {
+			console.log("添加新用户");
+			var nametip=$("#name-tip").text();
+			var nameLen=nametip.length;
+			var phonetip=$("#phone-tip").text();
+			var phoneLen=phonetip.length;
+			var passwordtip=$("#password-tip").text();
+			var pwdLen=passwordtip.length;
+			if(nameLen>0){
+				swal("提交失败!", "请输入正确的用户名", "error");
+			}else if(phoneLen>0){
+				swal("提交失败!", "请输入正确的手机号", "error");
+			}else if(pwdLen>0){
+				swal("提交失败!", "请输入正确的密码", "error");
+			}else{
+				var name = $("#username").val();
+				var phone = $("#phone").val();
+				var pwd = $("#password").val();
+				var img = "../userImg/touxiang.png";
+				var jsonData = {
+					"name" : name,
+					"phone" : phone,
+					"password": pwd,
+					"image": img,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   					crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/user/add",
+					data : jsonData,
+					beforeSend : function() {
+						loadingIndex = layer.msg('处理中', {
+							icon : 16
+						});
+
+					},
+					success : function(result) {
+						layer.close(loadingIndex);
+						if (result.code == 200) {
+							/*layer.msg("添加用户成功!", {
+								time : 2000,
+								icon : 6,
+								shift : 0
+							});*/
+							swal("注册成功",'点击进行登录', "success");
+							$('button, .confirm').click(function () {
+        						window.location.reload();
+							})
+						//	window.location.reload();
+						}else {
+							swal("注册失败!", result.msg, "error");
+						}
+
+					}
+
+				});
+			}
+		}
+	</script>
+	</body>
+
+</html>

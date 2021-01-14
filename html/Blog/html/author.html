@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Young Blog -- 博主主页</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Custom styles for this template -->
+  <link href="../css/modern-business.css" rel="stylesheet">
+
+	<!--<link href="../css/sweetalert.css" rel="stylesheet">-->
+</head>
+
+<body>
+
+ <!-- Navigation -->
+  <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Young Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+        	<li>
+        		<!-- Search -->
+      			<div class="input-group">
+              <input type="text" id="search" class="form-control" placeholder="Search for...">
+              <span class="input-group-btn">
+                <button class="btn btn-secondary" type="button" onclick="search();">Go!</button>
+              </span>
+            </div>
+        	</li>
+        	<li><span class="col-10"></span></li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">首页</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="login.html">登录</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="bloger.html">个人中心</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="blog-add.html">写文章</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Page Content -->
+  <div id="indexBlogs" class="container content-height">
+
+    <!-- 用户的个人信息 -->
+    <div class="mt-4 mb-3">
+    	<div class="row">	
+    			<div id="userimg">
+    		</div>
+    		<div class="userinfo-div">
+    			<ul class="list-unstyled" id="userinfo">
+    			</ul>
+    		</div>
+    	</div>
+    </div>
+
+		 <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" data-toggle="tab" href="#follow" onclick="getFollow(1);">关注</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#fans" onclick="getFans(1);">粉丝</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#article" onclick="getArticle(1);">文章</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#classification" onclick="getClassification(1);">分类专栏</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#like" onclick="getLike(1);">喜欢的文章</a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+  	<!-- 关注用户 -->
+    <div id="follow" class="container tab-pane active"><br>
+    </div>
+    <!-- 粉丝 -->
+    <div id="fans" class="container tab-pane fade"><br>
+    </div>
+    <!-- 文章 -->
+    <div id="article" class="container tab-pane fade"><br>   
+    </div>
+    <!-- 分类专栏 -->
+    <div id="classification" class="container tab-pane fade"><br>
+   			<ul class="panel-group list-group" id="accordion">
+	
+   			</ul>
+    </div>
+    <!-- 喜欢的文章 -->
+    <div id="like" class="container tab-pane fade"><br>  
+    </div>
+  </div>
+
+
+  </div>
+  <!-- /.container -->
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; Your Website 2019</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+ <!-- Bootstrap core JavaScript -->
+  <script src="../js/jquery.min.js"></script>
+  <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <!--<script src="../js/sweetalert.min.js"></script>-->
+  <script type="text/javascript">
+  		var userId=0;
+  		var blogerId=false;
+  	 	$(function(){
+  	 		blogerId=GetQueryString("blogerId");
+  	 		getUserId();
+  	 		console.log(userId);
+  	 		console.log(blogerId);
+  	 		if(blogerId==userId){ //博主为当前登录用户
+  	 			window.location.href = "bloger.html";
+  	 		}
+  	 		getUser();
+				var item=$(".nav-link.active").attr("href");
+				var id=item.substring(1);
+				if(id=="follow"){
+					getFollow(1);
+				}else if(id=="fans"){
+					getFans(1);
+				}else if(id=="article"){
+					getArticle(1);
+				}else if(id=="classification"){
+					getClassification(1);
+				}else{  //like
+					getLike(1);
+				}
+  	 	});
+  	 	
+  	 	function getUserId(){
+  	 		$.ajax({
+					xhrFields: {
+      			withCredentials: true  
+   				},
+   				crossDomain: true,
+   				async: false,              //ajax执行同步操作
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/user/getId",
+					success : function(result) {
+						if (result.code == 200) {
+							userId=result.id;	
+						}
+					}
+				});
+  	 	}
+  	 	
+  	 	function GetQueryString(name)
+		{
+    	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+     	var r = window.location.search.substr(1).match(reg);
+     	if(r!=null)return  unescape(r[2]); return null;
+		}
+  	 	
+  	 	function getFollow(pageNum){
+  	 		//alert("关注");
+  	 		$("#follow").empty();
+  	 		var jsonData = {
+					"blogerId" : blogerId,
+					"userId" : userId,
+					"pageNum" : pageNum,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/friends/otherFollows",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							//分页显示用户关注信息
+							console.log(result);
+							var length=result.page.list.length;
+							var followUl="<ul id='follow_ul' class='list-unstyled'></ul>";
+							$("#follow").append(followUl);
+							for(var i=0;i<length;i++){
+								var userItem="<li><div class='mt-4 mb-3'><div class='row'>"
+														+"<div><img src='"+result.page.list[i].user.image+"' class='img-circle-small'/></div>"
+														+"<div class='col-md-4'><ul class='list-unstyled'><li><h3><a class='username' href='author.html?blogerId="+result.page.list[i].user.id+"'>"+result.page.list[i].user.name+"</a></h3></li>"
+														+"<li class='text-muted'><span>关注&nbsp;<label id='follow-followNum"+result.page.list[i].user.id+"'>"+result.page.list[i].followNum+"</label>|</span>"
+														+"<span>粉丝&nbsp;<label id='follow-fansNum"+result.page.list[i].user.id+"'>"+result.page.list[i].fansNum+"</label>|</span>"
+														+"<span>文章&nbsp;"+result.page.list[i].blogNum+"</span></li></ul></div>";
+								if(result.page.list[i].user.id!=userId){
+									if(result.page.list[i].follow==true){
+										userItem=userItem+"<div class='col-md-6'><button id='btn_follow"+result.page.list[i].user.id+"' class='btn btn-secondary' onClick='deleteFollow("+userId+","+result.page.list[i].user.id+")'>取消关注</button></div></div><hr /></div></li>";
+									}else{
+										userItem=userItem+"<div class='col-md-6'><button id='btn_follow"+result.page.list[i].user.id+"' class='btn btn-secondary' onClick='addFollow("+userId+","+result.page.list[i].user.id+")'>关注</button></div></div><hr /></div></li>";
+									}
+								}else{
+									userItem=userItem+"</div><hr /></div></li>";
+								}
+								$("#follow_ul").append(userItem);	
+							}
+							var total=result.page.pages;
+							if(total>1){ //只有总页数大于1时才显示分页
+								var pageInfo="<ul class='pagination'>";
+								var d=parseInt(pageNum)-1;
+								var s=parseInt(pageNum)+1;
+								if(d<result.page.firstPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&laquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getFollow('"+d+"')>&laquo;</a></li>";
+								}
+								for(var i=1;i<=result.page.pages;i++){
+									if(result.page.pageNum==i){
+										pageInfo=pageInfo+"<li class='page-item active'><a class='page-link' href='#' onclick=getFollow('"+i+"')>"+i+"</a></li>";
+									}else{
+										pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getFollow('"+i+"')>"+i+"</a></li>";
+									}
+								}
+								if(s>result.page.lastPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&raquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getFollow('"+s+"')>&raquo;</a></li>";
+								}
+								pageInfo=pageInfo+"</ul>";
+								$("#follow").append(pageInfo);
+							}
+						}else {
+							swal("查找失败!", result.msg, "error");
+						}
+
+					}
+
+				});	
+  	 	}
+  	 	
+  	 	function deleteFollow(id,followId){
+  	 		var jsonData = {
+					"userId" : id,
+					"followId" : followId,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/friends/delete",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							var btnId="#btn_follow"+followId;
+							var btnId2="#btn_fans"+followId;
+							$(btnId).text("关注");
+							$(btnId).attr("onClick","addFollow("+id+","+followId+")");
+							$(btnId2).text("关注");
+							$(btnId2).attr("onClick","addFollow("+id+","+followId+")");
+							var fansNumId1="#follow-fansNum"+followId;   //被关注用户的粉丝数减1
+							var fansNumId2="#fans-fansNum"+followId;
+							var followerFansNum1=$(fansNumId1).text();
+							var followerFansNum2=$(fansNumId2).text();
+							followerFansNum1=parseInt(followerFansNum1);
+							followerFansNum1=followerFansNum1-1;
+							followerFansNum2=parseInt(followerFansNum2);
+							followerFansNum2=followerFansNum2-1;
+							$(fansNumId1).text(followerFansNum1);
+							$(fansNumId2).text(followerFansNum2);
+						}else {
+							swal("取消关注失败!", result.msg, "error");
+						}
+
+					}
+				});	
+  	 		
+  	 	}
+  	 	
+  	 	function addFollow(id,followId){
+  	 		getUserId();
+  	 		//先判断用户是否登录系统
+  	 		if(userId==0){
+  	 			swal("未登录！",'点击进行登录', "error");
+							$('button, .confirm').click(function () {
+        				location.href = 'login.html'
+							})
+  	 		}
+  	 		var jsonData = {
+					"userId" : id,
+					"followId" : followId,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/friends/add",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							var btnId="#btn_follow"+followId;
+							var btnId2="#btn_fans"+followId;
+							$(btnId).text("取消关注");
+							$(btnId).attr("onClick","deleteFollow("+id+","+followId+")");		
+							$(btnId2).text("取消关注");
+							$(btnId2).attr("onClick","deleteFollow("+id+","+followId+")");		
+							var fansNumId1="#follow-fansNum"+followId;   //被关注用户的粉丝数加1
+							var fansNumId2="#fans-fansNum"+followId;
+							var followerFansNum1=$(fansNumId1).text();
+							var followerFansNum2=$(fansNumId2).text();
+							followerFansNum1=parseInt(followerFansNum1);
+							followerFansNum1=followerFansNum1+1;
+							followerFansNum2=parseInt(followerFansNum2);
+							followerFansNum2=followerFansNum2+1;
+							$(fansNumId1).text(followerFansNum1);	
+							$(fansNumId2).text(followerFansNum2);
+						}else {
+							swal("关注失败!", result.msg, "error");
+						}
+
+					}
+				});	
+				
+  	 	}
+  	 	
+  	 	function getFans(pageNum){
+  	 	//	alert("粉丝");
+  	 		$("#fans").empty();
+  	 		var jsonData = {
+					"blogerId" : blogerId,
+					"userId" : userId,
+					"pageNum" : pageNum,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/friends/otherFans",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							//查找用户关注信息成功
+							console.log(result.page);
+							//分页显示用户关注信息
+							var length=result.page.list.length;
+							var fansUl="<ul id='fans_ul' class='list-unstyled'></ul>";
+							$("#fans").append(fansUl);
+							for(var i=0;i<length;i++){
+								var userItem="<li><div class='mt-4 mb-3'><div class='row'>"
+														+"<div><img src='"+result.page.list[i].user.image+"' class='img-circle-small'/></div>"
+														+"<div class='col-md-4'><ul class='list-unstyled'><li><h3><a class='username' href='author.html?blogerId="+result.page.list[i].user.id+"'>"+result.page.list[i].user.name+"</a></h3></li>"
+														+"<li class='text-muted'><span>关注&nbsp;<label id='fans-followNum"+result.page.list[i].user.id+"'>"+result.page.list[i].followNum+"</label>|</span>"
+														+"<span>粉丝&nbsp;<label id='fans-fansNum"+result.page.list[i].user.id+"'>"+result.page.list[i].fansNum+"</label>|</span>"
+														+"<span>文章&nbsp;"+result.page.list[i].blogNum+"</span></li></ul></div>";
+								if(result.page.list[i].user.id!=userId){
+									if(result.page.list[i].follow==true){
+										userItem=userItem+"<div class='col-md-6'><button id='btn_fans"+result.page.list[i].user.id+"' class='btn btn-secondary' onClick='deleteFollow("+userId+","+result.page.list[i].user.id+")'>取消关注</button></div></div><hr /></div></li>";
+									}else{
+										userItem=userItem+"<div class='col-md-6'><button id='btn_fans"+result.page.list[i].user.id+"' class='btn btn-secondary' onClick='addFollow("+userId+","+result.page.list[i].user.id+")'>关注</button></div></div><hr /></div></li>";
+									}
+								}else{
+									userItem=userItem+"</div><hr /></div></li>";
+								}
+								$("#fans_ul").append(userItem);	
+							}
+							var total=result.page.pages;
+							if(total>1){ //只有总页数大于1时才显示分页
+								var pageInfo="<ul class='pagination'>";
+								var d=parseInt(pageNum)-1;
+								var s=parseInt(pageNum)+1;
+								if(d<result.page.firstPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&laquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getFans('"+d+"')>&laquo;</a></li>";
+								}
+								for(var i=1;i<=result.page.pages;i++){
+									if(result.page.pageNum==i){
+										pageInfo=pageInfo+"<li class='page-item active'><a class='page-link' href='#' onclick=getFans('"+i+"')>"+i+"</a></li>";
+									}else{
+										pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getFans('"+i+"')>"+i+"</a></li>";
+									}
+								}
+								if(s>result.page.lastPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&raquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getFans('"+s+"')>&raquo;</a></li>";
+								}
+								pageInfo=pageInfo+"</ul>";
+								$("#fans").append(pageInfo);
+						}	
+						}else {
+							swal("查找失败!", result.msg, "error");
+						}
+
+					}
+				});	
+  	 	}
+  	 	
+  	 	function getArticle(pageNum){
+  	 		//alert("文章");
+  	 		$("#article").empty();
+  	 		var jsonData = {
+					"id" : blogerId,
+					"pageNum" : pageNum,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/article/articles",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							//查找用户关注信息成功
+							console.log(result.page);
+							var length=result.page.list.length;
+							for(var i=0;i<length;i++){
+								var blogItem="<div class='card mb-4'><div class='card-body'><div class='row'>";
+								blogItem=blogItem+"<div class='col-lg-12'><h2 class='card-title'>"+result.page.list[i].blog.title+"</h2>";
+								var content=result.page.list[i].blog.content;
+								content=content.replace(/!\[\]\(.*?\)/,"");  //删除图片路径
+								content=content.replace(/#/g,""); 
+								var blogLength=content.length;
+								if(blogLength>100){
+									content=content.substring(0,100);
+									content=content+"...";
+								}
+								blogItem=blogItem+"<p class='card-text'>"+content+"</p>"
+												+"<a href='blog-post.html?blogId="+result.page.list[i].blog.id+"' class='btn btn-primary'>Read More &rarr;</a>"
+												+"</div></div></div>"
+												+"<div class='card-footer text-muted'>"+result.page.list[i].blog.time+"&nbsp;|&nbsp;<a href='author.html?blogerId="+result.page.list[i].blogger.id+"'>"+result.page.list[i].blogger.name+"</a>"
+												+"&nbsp;|&nbsp;<img src='../img/dianzan_before.png' class='icon-size'/>&nbsp;"+result.page.list[i].blog.likeCount
+												+"&nbsp;|&nbsp;<img src='../img/view.png' width='30'/>"+result.page.list[i].blog.scanCount
+												+"&nbsp;|&nbsp;<img src='../img/comment.png' class='icon-size'/>&nbsp;"+result.page.list[i].blog.remarkCount+"</div></div>";
+								$("#article").append(blogItem);					
+							}
+							var total=result.page.pages;
+							if(total>1){ //只有总页数大于1时才显示分页
+								var pageInfo="<ul class='pagination'>";
+								var d=parseInt(pageNum)-1;
+								var s=parseInt(pageNum)+1;
+								if(d<result.page.firstPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&laquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getArticle('"+d+"')>&laquo;</a></li>";
+								}
+								for(var i=1;i<=result.page.pages;i++){
+									if(result.page.pageNum==i){
+										pageInfo=pageInfo+"<li class='page-item active'><a class='page-link' href='#' onclick=getArticle('"+i+"')>"+i+"</a></li>";
+									}else{
+										pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getArticle('"+i+"')>"+i+"</a></li>";
+									}
+								}
+								if(s>result.page.lastPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&raquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getArticle('"+s+"')>&raquo;</a></li>";
+								}
+								pageInfo=pageInfo+"</ul>";
+								$("#article").append(pageInfo);
+							}
+							
+						}else {
+							swal("查找失败!", result.msg, "error");
+						}
+
+					}
+				});	
+				
+  	 	}
+  	 	
+  	 	function getClassification(pageNum){
+  	 		//alert("分类专栏");
+  	 		$("#accordion").empty();
+  	 		$(".pagination").remove();
+  	 		var jsonData = {
+					"id" : blogerId,
+					"pageNum" : pageNum,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/category/get",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							//查找用户关注信息成功
+							console.log(result.page);
+							//分页显示用户分类信息
+							var length=result.page.list.length;
+							for(var i=0;i<length;i++){
+								var categoryItem="<li class='panel panel-default list-group-item'><div class='panel-heading'><span class='panel-title'>"
+										+"<a data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"' class='classification'>"+result.page.list[i].classify.name
+										+"<small>"+result.page.list[i].blogNum+"篇</small></a></div>";
+								var blogs=result.page.list[i].blogs;
+								var blotItem="<div id='collapse"+i+"' class='panel-collapse collapse in'>"
+								blogItem=blotItem+"<div class='panel-body'><ul>";
+								for(var j=0;j<blogs.length;j++){
+									blogItem=blogItem+"<li><a href='blog-post.html?blogId="+blogs[j].id+"' class='blog-title'>"+blogs[j].title+"</a></li>";
+								}
+								blogItem=blogItem+"</ul></div></div></li>";
+								$("#accordion").append(categoryItem);
+								$("#accordion").append(blogItem);
+							}
+							var total=result.page.pages;
+							if(total>1){ //只有总页数大于1时才显示分页
+								var pageInfo="<ul class='pagination'>";
+								var d=parseInt(pageNum)-1;
+								var s=parseInt(pageNum)+1;
+								if(d<result.page.firstPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&laquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getClassification('"+d+"')>&laquo;</a></li>";
+								}
+								for(var i=1;i<=result.page.pages;i++){
+									if(result.page.pageNum==i){
+										pageInfo=pageInfo+"<li class='page-item active'><a class='page-link' href='#' onclick=getClassification('"+i+"')>"+i+"</a></li>";
+									}else{
+										pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getClassification('"+i+"')>"+i+"</a></li>";
+									}
+								}
+								if(s>result.page.lastPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&raquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getClassification('"+s+"')>&raquo;</a></li>";
+								}
+								pageInfo=pageInfo+"</ul>";
+								$("#classification").append(pageInfo);
+							}	
+						}else {
+							swal("查找失败!", result.msg, "error");
+						}
+
+					}
+				});	
+  	 	}
+  	 	
+  	 	function getLike(pageNum){
+  	 		//alert("喜欢的文章");
+  	 		$("#like").empty();
+  	 		var jsonData = {
+					"id" : blogerId,
+					"pageNum" : pageNum,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/article/likes",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							//查找用户关注信息成功
+							console.log(result.page);
+							//分页显示用户关注信息
+							var length=result.page.list.length;
+							for(var i=0;i<length;i++){
+								var blogItem="<div class='card mb-4'><div class='card-body'><div class='row'>";
+								blogItem=blogItem+"<div class='col-lg-12'><h2 class='card-title'>"+result.page.list[i].blog.title+"</h2>";
+								var content=result.page.list[i].blog.content;
+								content=content.replace(/!\[\]\(.*?\)/,"");  //删除图片路径
+								content=content.replace(/#/g,""); 
+								var blogLength=content.length;
+								if(blogLength>100){
+									content=content.substring(0,100);
+									content=content+"...";
+								}
+								blogItem=blogItem+"<p class='card-text'>"+content+"</p>"
+												+"<a href='blog-post.html?blogId="+result.page.list[i].blog.id+"' class='btn btn-primary'>Read More &rarr;</a>"
+												+"</div></div></div>"
+												+"<div class='card-footer text-muted'>"+result.page.list[i].blog.time+"&nbsp;|&nbsp;<a href='author.html?blogerId="+result.page.list[i].blogger.id+"'>"+result.page.list[i].blogger.name+"</a>"
+												+"&nbsp;|&nbsp;<img src='../img/dianzan_before.png' class='icon-size'/>&nbsp;"+result.page.list[i].blog.likeCount
+												+"&nbsp;|&nbsp;<img src='../img/view.png' width='30'/>"+result.page.list[i].blog.scanCount
+												+"&nbsp;|&nbsp;<img src='../img/comment.png' class='icon-size'/>&nbsp;"+result.page.list[i].blog.remarkCount+"</div></div>";
+								$("#like").append(blogItem);					
+							}
+						var total=result.page.pages;
+							if(total>1){ //只有总页数大于1时才显示分页
+								var pageInfo="<ul class='pagination'>";
+								var d=parseInt(pageNum)-1;
+								var s=parseInt(pageNum)+1;
+								if(d<result.page.firstPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&laquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getLike('"+d+"')>&laquo;</a></li>";
+								}
+								for(var i=1;i<=result.page.pages;i++){
+									if(result.page.pageNum==i){
+										pageInfo=pageInfo+"<li class='page-item active'><a class='page-link' href='#' onclick=getLike('"+i+"')>"+i+"</a></li>";
+									}else{
+										pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getLike('"+i+"')>"+i+"</a></li>";
+									}
+								}
+								if(s>result.page.lastPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&raquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getLike('"+s+"')>&raquo;</a></li>";
+								}
+								pageInfo=pageInfo+"</ul>";
+								$("#like").append(pageInfo);
+							}	
+						
+						}else {
+							swal("查找失败!", result.msg, "error");
+						}
+
+					}
+				});	
+  	 		
+  	 	}
+  	 	
+  	 	function getUser(){
+  	 		var jsonData = {
+					"blogerId" : blogerId,
+					"userId" : userId,
+				}; 
+  	 		$.ajax({
+					xhrFields: {
+      					 withCredentials: true  
+   					},
+   				crossDomain: true,
+   				async: false,              //ajax执行同步操作
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/user/others",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							//查询用户信息成功
+							console.log(result);
+							var img="<img src='"+result.userVO.user.image+"' class=img-circle />";
+							$("#userimg").append(img);
+							var user="<li><h2>"+result.userVO.user.name+"</h2></li>"
+											+"<li><small>"+result.userVO.user.description+"</small></li>"
+											+"<li class=text-muted>"
+											+"<span>关注&nbsp;<label id='follow-followNum"+result.userVO.user.id+"'>"+result.userVO.followNum+"</label>|</span>"
+											+"<span>粉丝&nbsp;<label id='follow-fansNum"+result.userVO.user.id+"'>"+result.userVO.fansNum+"</label>|</span>"
+											+"<span>文章&nbsp;"+result.userVO.blogNum+"|</span>"
+											+"<span>获赞&nbsp;"+result.userVO.blogLiked+"</span>"	
+											+"<input id=userid value='"+result.userVO.user.id+"' hidden>";
+							if(result.userVO.follow==false){  //未关注，显示"关注"按钮
+								user=user+"<button id='btn_follow"+blogerId+"' class='btn btn-secondary position-btn' onClick='addFollow("+userId+","+blogerId+")'>关注</button></li>";
+							}else{   //关注，显示"取消关注"按钮  
+								user=user+"<button id='btn_follow"+blogerId+"' class='btn btn-secondary position-btn' onClick='deleteFollow("+userId+","+blogerId+")'>取消关注</button></li>";
+							}					
+							$("#userinfo").append(user);
+						} else {
+							swal(result.msg,'点击进行登录', "error");
+							$('button, .confirm').click(function () {
+        				location.href = 'login.html'
+							})
+							
+						}
+						
+					}
+
+				});
+  	 	}
+  	 	
+  	 function search(){
+			var key=$("#search").val();
+			console.log(key);
+			searchBlogs(key,1);
+		}
+		
+		function searchBlogs(key,pageNum){   //搜索博客
+				$("#indexBlogs").empty();
+				var jsonData = {
+					"key" : key,
+					"pageNum" : pageNum,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/article/search",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							console.log(result);
+							$("#indexBlogs").append("<br />");
+							var blogs=result.page.list;
+							var length=blogs.length;
+							for(var i=0;i<length;i++){
+								var blogItem="<div class='card mb-4'><div class='card-body'><div class='row'>"
+								+"<div class='col-lg-12'><h2 class='card-title'>"+blogs[i].blog.title+"</h2>";
+					//			+"<div class='col-lg-6'><a href='#'><img class='img-fluid rounded' src='http://placehold.it/750x300' alt=''></a></div>"
+								var content=blogs[i].blog.content;
+								content=content.replace(/!\[\]\(.*?\)/,"");  //删除图片路径
+								content=content.replace(/#/g,""); 
+								var blogLength=content.length;
+								if(blogLength>100){
+									content=content.substring(0,100);
+									content=content+"...";
+								}
+								blogItem=blogItem+"<p class='card-text'>"+content+"</p>"
+								+"<a href='blog-post.html?blogId="+blogs[i].blog.id+"' class='btn btn-primary'>Read More &rarr;</a>"
+								+"</div></div></div>"
+								+"<div class='card-footer text-muted'>"+blogs[i].blog.time+"&nbsp;|&nbsp;<a href='#'>"+blogs[i].blogger.name+"</a>"
+								+"&nbsp;|&nbsp;<img src='../img/dianzan_before.png' class='icon-size'/>&nbsp;"+blogs[i].blog.likeCount+"&nbsp;|&nbsp;<img src='../img/view.png' width='30'/>"+blogs[i].blog.scanCount
+								+"&nbsp;|&nbsp;<img src='../img/comment.png' class='icon-size'/>&nbsp;"+blogs[i].blog.remarkCount+"</div></div>";
+								$("#indexBlogs").append(blogItem);
+							}
+							var d=parseInt(pageNum)-1;
+							var s=parseInt(pageNum)+1;
+							var pagination="<ul class='pagination justify-content-center mb-4'>";
+							if(d<result.page.firstPage){
+								pagination=pagination+"<li class='page-item disabled'><a class='page-link' href='#'>&larr; Older</a></li>";
+							}else{
+								pagination=pagination+"<li class='page-item'><a class='page-link' href='#' onClick='getBlogs("+key+","+d+");'>&larr; Older</a></li>";
+							}
+							if(s>result.page.lastPage){
+								pagination=pagination+"<li class='page-item disabled'><a class='page-link' href='#'>Newer &rarr;</a></li>";
+							}else{
+								pagination=pagination+"<li class='page-item'><a class='page-link' href='#' onClick='getBlogs("+key+","+s+");'>Newer &rarr;</a></li>";
+							}
+							$("#indexBlogs").append(pagination);
+						}else {
+							swal("失败!", "查找博客信息失败", "error");
+						}
+
+					}
+				});	
+		}
+  	 	
+  	 	
+  	 	
+  </script>
+
+</body>
+
+</html>

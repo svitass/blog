@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>博客详情</title>
+
+   <!-- Bootstrap core CSS -->
+  <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Custom styles for this template -->
+  <link href="../css/modern-business.css" rel="stylesheet">
+ <!-- <link href="../css/sweetalert.css" rel="stylesheet">-->
+<style>
+	/*.bolg-content*/ 
+	img{
+		max-width:98%;
+	}
+</style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+  <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Young Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+        	<li>
+        		<!-- Search -->
+      			<div class="input-group">
+              <input type="text" id="search" class="form-control" placeholder="Search for...">
+              <span class="input-group-btn">
+                <button class="btn btn-secondary" type="button" onclick="search();">Go!</button>
+              </span>
+            </div>
+        	</li>
+        	<li><span class="col-10"></span></li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">首页</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="login.html">登录</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="bloger.html">个人中心</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="blog-add.html">写文章</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div id="indexBlogs" class="container content-height">
+			<div id="blogpost"></div>
+  </div>
+  <!-- /.container -->
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; Your Website 2019</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+   <!-- Bootstrap core JavaScript -->
+  <script src="../js/jquery.min.js"></script>
+  <script src="../editormd/lib/marked.min.js"></script>
+  <script src="../editormd/lib/prettify.min.js"></script>
+  <script src="../editormd/lib/raphael.min.js"></script>
+  <script src="../editormd/lib/underscore.min.js"></script>
+  <script src="../editormd/lib/sequence-diagram.min.js"></script>
+  <script src="../editormd/lib/flowchart.min.js"></script>
+  <script src="../editormd/lib/jquery.flowchart.min.js"></script>
+  <script src="../editormd/lib/editormd.min.js"></script>
+  <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <!--<script src="../js/sweetalert.min.js"></script>-->
+  <script type="text/javascript">
+  	var blogId=0;
+  	var userId=false;
+  	var showEditor="";
+		 $(function(){
+		 		blogId=getQueryVariable("blogId");
+		 		getUser();
+		 		getBlog(blogId);
+		 });
+		 
+		 
+		 //获取url参数
+		function getQueryVariable(variable){
+		 	var query = window.location.search.substring(1);
+      var vars = query.split("&");
+      for (var i=0;i<vars.length;i++) {
+          var pair = vars[i].split("=");
+          if(pair[0] == variable){return pair[1];}
+      }
+      return(false);
+		}
+		
+		function getUser(){
+  	 		$.ajax({
+					xhrFields: {
+      				withCredentials: true  
+   				},
+   				crossDomain: true,
+   				async: false,              //ajax执行同步操作
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/user/getId",
+					success : function(result) {
+						if (result.code == 200) {
+							userId=result.id;	
+						}
+					}
+				});
+  	} 
+		 
+		function getBlog(blogId){
+			$("#blogpost").empty();
+			var jsonData = {
+					"blogId" : blogId,
+			};
+			$.ajax({
+				xhrFields: {
+      			withCredentials: true  
+   			},
+   			crossDomain: true,
+   			async: false,              //ajax执行同步操作
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/article/detail",
+				data : jsonData,
+				success : function(result) {
+					if (result.code == 200) {
+						//查询博客信息成功
+						var blog="<h1 class='mt-4 mb-3'>"+result.blogVO.blog.title+"</h1>"
+										+"<ol class='breadcrumb'>"
+										+"<li class='breadcrumb-item active'><a href='author.html?blogerId="+result.blogVO.blogger.id+"'>"+result.blogVO.blogger.name+"</a></li>"
+										+"<li class='breadcrumb-item'>"+result.blogVO.blog.time+"</li>"
+										+"<li class='breadcrumb-item'>分类："+result.blogVO.classify.name+"</li>";
+						console.log("输出访问者id和作者id");
+						console.log(userId);
+						console.log(result.blogVO.blog.userid);
+						if(userId==result.blogVO.blog.userid){  //若访问用户是这篇博客的作者
+							blog=blog+"<li><a href='blog-edit.html?blogId="+blogId+"'><button class='edit-btn'>编辑</button></a></li>"
+											+"<li><a href='#'><button class='delete-btn' onClick='deleteBlog("+blogId+");'>删除</button></a></li>";
+						}
+						blog=blog+"</ol>"
+										+"<div id='row' class='row'>"
+										+"<div id='bloginfo' class='col-lg-8'></div>"
+										+"<div id='sidebar' class='col-md-4'></div></div>";
+						$("#blogpost").append(blog);
+						//bloginfo：填充博客基本信息
+						blog="<textarea style='display:none;' class='bolg-content'>"+result.blogVO.blog.content+"</textarea><hr>";		
+				//	blog="<p>"+result.blogVO.blog.content+"</p><hr>";
+						$("#bloginfo").append(blog);
+						showBlog();
+						//bloginfo： 添加点赞，评论，浏览信息
+						blog="<div class='card-footer text-muted'>";  //card-footer text-muted |   card my-4 card-header
+						var islike=isLiked(blogId);
+						console.log("调用完毕，输出点赞信息");
+						console.log(islike);
+						if(islike==false){  //未点赞
+							blog=blog+"<a id='like' onClick='addLike("+blogId+");'><img id='likeImg' src='../img/dianzan_before.png' class='icon-size' /></a>点赞"
+										+"<label id='likeNum'>"+result.blogVO.blog.likeCount+"</label>";
+						}else{   //已点赞
+							blog=blog+"<a id='like' onClick='cancelLike("+blogId+");'><img id='likeImg' src='../img/dianzan_after.png' class='icon-size' /></a>点赞"
+										+"<label id='likeNum'>"+result.blogVO.blog.likeCount+"</label>";
+						}
+						blog=blog+"<img src='../img/comment.png' class='icon-size comment-img' />评论"
+										+"<label id='commentNum'>"+result.blogVO.blog.remarkCount+"</label>"
+										 +"<img src='../img/view.png' class='icon-size view-img' />阅读"+result.blogVO.blog.scanCount+"&nbsp;</div>";
+						$("#bloginfo").append(blog);
+						//bloginfo:发布评论
+						var comment="<div class='card my-4'>"
+										 +"<h5 class='card-header'>写下你的评论:</h5>"
+										 +"<div class='card-body'>"
+										 +"<div class='form-group'>"
+            				 +"<textarea class='form-control' rows='3' id='remark'></textarea>"
+            				 +"</div>"
+              			 +"<button type='submit' class='btn btn-primary' onClick='addComment("+blogId+");'>发布</button>"
+             				 +"</div>"
+            				 +"</div>"
+            				 +"<div id='comments'>评论列表</div>";
+           	$("#bloginfo").append(comment);			
+           	//bloginfo：获取评论列表
+           	getComment(blogId,1);
+           	//sidebar：获取分类专栏
+           	var bloggerId=result.blogVO.blogger.id;
+           	getCategory(bloggerId);
+           	blogRecommend(result.blogVO.blog.title);
+					} else {
+						//查询博客信息失败：该博客已被删除
+						swal("查询失败!", result.msg, "error");
+					}
+				}
+			});
+		}
+		
+		function isLiked(blogId){
+			if(userId==false){    //???有问题，待修改
+				return false;
+			} 
+			var isLiked=false;
+			var jsonData = {
+					"blogId" : blogId,
+					"userId" : userId,
+				};
+			$.ajax({
+				xhrFields: {
+      		withCredentials: false    // 前端设置是否带cookie
+   			},
+   			crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+				type : "POST",
+				async: false,
+				url : "http://127.0.0.1:8080/blog/like/isLiked",
+				data : jsonData,
+				success : function(result) {
+					if (result.code == 200) {
+						 isLiked=result.isLiked;
+						 console.log("输出");
+						 console.log(isLiked);
+					}else {
+						swal("失败!", "查找点赞信息失败", "error");
+					}
+				}
+			});	
+			return isLiked;
+		}
+		
+		function getComment(blogId,pageNum){  //获取博客评论
+			$("#comments").empty();
+			var jsonData = {
+					"blogId" : blogId,
+					"pageNum" : pageNum,
+				};
+			$.ajax({
+				xhrFields: {
+      		withCredentials: false    // 前端设置是否带cookie
+   			},
+   			crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/remark/get",
+				data : jsonData,
+				success : function(result) {
+					if (result.code == 200) {
+						var length=result.page.list.length;
+						for(var i=0;i<length;i++){
+							var commentItem="<div class='media mb-4'>"
+									+"<img class='d-flex mr-3 img-circle-small' src='"+result.page.list[i].author.image+"' alt=''>"
+									+"<div class='media-body'>"
+									+"<h5 class='mt-0'>"+result.page.list[i].author.name+"<small class='comment-time'>"+result.page.list[i].remark.time+"</small></h5>"+result.page.list[i].remark.comment
+									+"</div></div>";
+							$("#comments").append(commentItem);					
+						}
+						var total=result.page.pages;
+						if(total>1){ //只有总页数大于1时才显示分页
+								var pageInfo="<ul class='pagination'>";
+								var d=parseInt(pageNum)-1;
+								var s=parseInt(pageNum)+1;
+								if(d<result.page.firstPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&laquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getComment('"+blogId+"','"+d+"')>&laquo;</a></li>";
+								}
+								for(var i=1;i<=result.page.pages;i++){
+									if(result.page.pageNum==i){
+										pageInfo=pageInfo+"<li class='page-item active'><a class='page-link' href='#' onclick=getComment('"+blogId+"','"+i+"')>"+i+"</a></li>";
+									}else{
+										pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getComment('"+blogId+"','"+i+"')>"+i+"</a></li>";
+									}
+								}
+								if(s>result.page.lastPage){
+									pageInfo=pageInfo+"<li class='page-item disabled'><a class='page-link' href='#'>&raquo;</a></li>";
+								}else{
+									pageInfo=pageInfo+"<li class='page-item'><a class='page-link' href='#' onclick=getComment('"+blogId+"','"+s+"')>&raquo;</a></li>";
+								}
+								pageInfo=pageInfo+"</ul>";
+								$("#comments").append(pageInfo);
+						}	
+					}else {
+						swal("失败!", "查找博客评论信息失败", "error");
+					}
+				}
+			});	
+		}
+		
+		function getCategory(bloggerId){
+			var jsonData = {
+					"userId" : bloggerId,
+				};
+			$.ajax({
+				xhrFields: {
+      		withCredentials: false    // 前端设置是否带cookie
+   			},
+   			crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/category/getCategories",
+				data : jsonData,
+				success : function(result) {
+					if (result.code == 200) {
+						console.log(result);
+						var category="<div class='card my-4'>"
+									+"<h5 class='card-header'>分类专栏<small class='category-detail'><a href='author.html?blogerId="+bloggerId+"'>查看更多</a></small></h5>"
+									+"<div class='card-body'>"
+									+"<div class='row'>"
+									+"<div class='col-lg-6'>"
+									+"<ul class='list-unstyled mb-0'>";
+							/*	var category="<div class='card my-4'>"
+									+"<h5 class='card-header'>分类专栏</h5>"
+									+"<div class='card-body'>"
+									+"<div class='row'>"
+									+"<div class='col-lg-6'>"
+									+"<ul class='list-unstyled mb-0'>";*/
+						//增加li元素
+						var length=result.classifyList.length;
+						for(var i=0;i<length;i++){
+							 category=category+"<li><a href='category.html?categoryId="+result.classifyList[i].id+"'>"+result.classifyList[i].name+"</a></li>";
+							//category=category+"<li>"+result.classifyList[i].name+"</li>";
+						}
+						category=category+"</ul></div></div></div></div>";
+						$("#sidebar").append(category);		
+					}else {
+						swal("失败!", "查找博客评论信息失败", "error");
+					}
+				}
+			});	
+		}
+		
+	function blogRecommend(title){
+		var jsonData = {
+					"title" : title,
+				};
+			$.ajax({
+				xhrFields: {
+      		withCredentials: false    // 前端设置是否带cookie
+   			},
+   			crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/article/recommend",
+				data : jsonData,
+				success : function(result) {
+					if (result.code == 200) {
+						console.log("打印博客推荐信息");
+						console.log(result);
+						var blogs="<div class='card my-4'>"
+									+"<h5 class='card-header'>推荐阅读</h5>"
+									+"<div class='card-body'>"
+									+"<div class='row'>"
+									+"<ul class='list-unstyled mb-0'>";
+						//增加li元素
+						var length=result.blogs.length;
+						for(var i=0;i<length;i++){
+							blogs=blogs+"<li><ul class='list-unstyled mb-0'><li><a href='blog-post.html?blogId="+result.blogs[i].id+"&userId="+userId+"'>"+result.blogs[i].title+"</a></li>"
+									+"<li><small>阅读&nbsp;&nbsp;"+result.blogs[i].scanCount+"</small></li></ul><br /></li>";
+						}
+          	blogs=blogs+"</ul></div></div></div>";
+						$("#sidebar").append(blogs);
+					}else {
+						swal("失败!", "查找博客推荐信息失败", "error");
+					}
+				}
+			});	
+	}
+	
+	function deleteBlog(blogId){
+		var jsonData = {
+					"blogId" : blogId,
+				};
+			$.ajax({
+				xhrFields: {
+      		withCredentials: false    // 前端设置是否带cookie
+   			},
+   			crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/article/delete",
+				data : jsonData,
+				success : function(result) {
+					if (result.code == 200) {
+						swal("成功!",'删除博客成功！',"success");
+						$('button, .confirm').click(function () {
+        			location.href = 'index.html'
+						})
+					}else {
+						swal("失败!", "删除博客失败", "error");
+					}
+				}
+			});	
+	}
+		
+	function addLike(blogId){
+		getUser();
+		if(userId==false){
+			swal('未登录','点击进行登录', "error");
+			$('button, .confirm').click(function () {
+        	location.href = 'login.html'
+			})
+		}else{
+			var jsonData = {
+					"blogId" : blogId,
+					"userId" : userId,
+				};
+			$.ajax({
+				xhrFields: {
+      		withCredentials: false    // 前端设置是否带cookie
+   			},
+   			crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/like/add",
+				data : jsonData,
+				success : function(result) {
+					if (result.code == 200) {
+						//点赞博客成功:图标变成已点赞，点赞数加1
+						$("#like").attr("onClick","cancelLike("+blogId+")");
+						$("#likeImg").attr("src","../img/dianzan_after.png");
+						//获取点赞数量
+						var value=$("#likeNum").html();
+						value=parseInt(value)+1;
+						$("#likeNum").html(value);
+					}else {
+						swal("失败!", "点赞失败", "error");
+					}
+				}
+			});	
+		}
+	}
+	
+	function cancelLike(blogId){
+		getUser();
+		var jsonData = {
+					"blogId" : blogId,
+					"userId" : userId,
+				};
+			$.ajax({
+				xhrFields: {
+      		withCredentials: false    // 前端设置是否带cookie
+   			},
+   			crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/like/cancel",
+				data : jsonData,
+				success : function(result) {
+					if (result.code == 200) {
+						//点赞博客成功:图标变成已点赞，点赞数加1
+						$("#like").attr("onClick","addLike("+blogId+")");
+						$("#likeImg").attr("src","../img/dianzan_before.png");
+						//获取点赞数量
+						var value=$("#likeNum").html();
+						value=parseInt(value)-1;
+						$("#likeNum").html(value);
+					}else {
+						swal("失败!", "取消点赞失败", "error");
+					}
+				}
+			});	
+	}
+	
+	function addComment(blogId){
+		getUser();
+		if(userId==false){
+			swal('未登录','点击进行登录', "error");
+			$('button, .confirm').click(function () {
+        	location.href = 'login.html'
+			})
+		}else{
+			var comment=$("#remark").val();
+			console.log("打印出评论内容");
+			console.log(comment);
+			if(comment==""){
+				swal("失败!", "请输入评论内容", "error");
+				return false;
+			}
+		var jsonData = {
+					"comment" : comment,
+					"blogid" : blogId,
+					"userid" : userId,
+				};
+			$.ajax({
+				xhrFields: {
+      		withCredentials: false    // 前端设置是否带cookie
+   			},
+   			crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/remark/add",
+				data : jsonData,
+				success : function(result) {
+					if (result.code == 200) {
+						//获取点赞数量
+						var value=$("#commentNum").html();
+						value=parseInt(value)+1;
+						$("#commentNum").html(value);
+						getComment(blogId,1);
+						$("#remark").val("");
+					}else {
+						swal("失败!", "取消点赞失败", "error");
+					}
+				}
+			});	
+		}
+	}
+	
+	function showBlog(){
+		showEditor = editormd.markdownToHTML("bloginfo", {//注意：这里是上面DIV的id
+            htmlDecode: "style,script,iframe",
+            emoji: true,
+            taskList: true,
+            tex: true, // 默认不解析
+            flowChart: true, // 默认不解析
+            sequenceDiagram: true, // 默认不解析
+            codeFold: true,
+   });
+	}
+	
+	function search(){
+			var key=$("#search").val();
+			console.log(key);
+			searchBlogs(key,1);
+		}
+		
+		function searchBlogs(key,pageNum){   //搜索博客
+				$("#indexBlogs").empty();
+				var jsonData = {
+					"key" : key,
+					"pageNum" : pageNum,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/article/search",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							console.log(result);
+							$("#indexBlogs").append("<br />");
+							var blogs=result.page.list;
+							var length=blogs.length;
+							for(var i=0;i<length;i++){
+								var blogItem="<div class='card mb-4'><div class='card-body'><div class='row'>"
+								+"<div class='col-lg-12'><h2 class='card-title'>"+blogs[i].blog.title+"</h2>";
+					//			+"<div class='col-lg-6'><a href='#'><img class='img-fluid rounded' src='http://placehold.it/750x300' alt=''></a></div>"
+								var content=blogs[i].blog.content;
+								content=content.replace(/!\[\]\(.*?\)/,"");  //删除图片路径
+								content=content.replace(/#/g,""); 
+								var blogLength=content.length;
+								if(blogLength>100){
+									content=content.substring(0,100);
+									content=content+"...";
+								}
+								blogItem=blogItem+"<p class='card-text'>"+content+"</p>"
+								+"<a href='blog-post.html?blogId="+blogs[i].blog.id+"' class='btn btn-primary'>Read More &rarr;</a>"
+								+"</div></div></div>"
+								+"<div class='card-footer text-muted'>"+blogs[i].blog.time+"&nbsp;|&nbsp;<a href='#'>"+blogs[i].blogger.name+"</a>"
+								+"&nbsp;|&nbsp;<img src='../img/dianzan_before.png' class='icon-size'/>&nbsp;"+blogs[i].blog.likeCount+"&nbsp;|&nbsp;<img src='../img/view.png' width='30'/>"+blogs[i].blog.scanCount
+								+"&nbsp;|&nbsp;<img src='../img/comment.png' class='icon-size'/>&nbsp;"+blogs[i].blog.remarkCount+"</div></div>";
+								$("#indexBlogs").append(blogItem);
+							}
+							var d=parseInt(pageNum)-1;
+							var s=parseInt(pageNum)+1;
+							var pagination="<ul class='pagination justify-content-center mb-4'>";
+							if(d<result.page.firstPage){
+								pagination=pagination+"<li class='page-item disabled'><a class='page-link' href='#'>&larr; Older</a></li>";
+							}else{
+								pagination=pagination+"<li class='page-item'><a class='page-link' href='#' onClick='getBlogs("+key+","+d+");'>&larr; Older</a></li>";
+							}
+							if(s>result.page.lastPage){
+								pagination=pagination+"<li class='page-item disabled'><a class='page-link' href='#'>Newer &rarr;</a></li>";
+							}else{
+								pagination=pagination+"<li class='page-item'><a class='page-link' href='#' onClick='getBlogs("+key+","+s+");'>Newer &rarr;</a></li>";
+							}
+							$("#indexBlogs").append(pagination);
+						}else {
+							swal("失败!", "查找博客信息失败", "error");
+						}
+
+					}
+				});	
+		}
+	
+	</script>
+
+</body>
+
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>编辑博客</title>
+  		<link href="../editormd/css/editormd.css" rel="stylesheet" />
+  		<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  		<link href="../css/blog.css" rel="stylesheet">
+  		<!--<link href="../css/sweetalert.css" rel="stylesheet">-->
+	</head>
+	<body>
+		<div>
+			<a href="index.html" class="a-back"><<首页</a>
+		 	<input type="text" id="title" name="title" class="blog-title" placeholder="请输入文章标题" />
+		 	<select id="category">
+    			<option value="Java">Java</option>
+    			<option value="大数据">大数据</option>
+    			<option value="数据结构">数据结构</option>
+    			<option value="其他">其他</option>
+			</select>
+		 	<button type="submit" class="btn btn-primary" onclick="editBlog();">保存文章</button>
+		 	
+		 </div>
+		<div id="my-editormd" >
+			<textarea id="my-editormd-markdown-doc" name="my-editormd-markdown-doc" style="display:none;"></textarea>
+			<!-- 注意：name属性的值-->
+			<textarea id="my-editormd-html-code" name="my-editormd-html-code" style="display:none;"></textarea>
+		</div>
+		
+		  
+  		 <script src="../editormd/examples/js/jquery.min.js"></script>
+  		 <script src="../editormd/lib/editormd.min.js"></script>
+  		 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  		<!--<script src="../js/sweetalert.min.js"></script>-->
+  		 <script type="text/javascript">
+  		 	var userId=false;
+  		 	var blogId=0;
+  		 	var category=0;
+  			$(function() {
+  				blogId=getQueryVariable("blogId");
+  				getUser();
+  				getCategory();
+  				getBlog();
+      			editormd("my-editormd", {//注意1：这里的就是上面的DIV的id属性值
+         		width   : "90%",
+          		height  : 640,
+          		syncScrolling : "single",
+          		path    : "../editormd/lib/",//注意2：你的路径
+          		saveHTMLToTextarea : true,//注意3：这个配置，方便post提交表单
+          		
+          		 /**上传图片相关配置如下*/
+         		imageUpload : true,
+         		imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+         		imageUploadURL : "/smart-api/upload/editormdPic/",//注意你后端的上传图片服务地址
+          		
+      			});
+ 			 });
+ 			
+ 			 //获取url参数
+			function getQueryVariable(variable){
+		 		var query = window.location.search.substring(1);
+      			var vars = query.split("&");
+      			for (var i=0;i<vars.length;i++) {
+          			var pair = vars[i].split("=");
+          			if(pair[0] == variable){return pair[1];}
+      			}
+      			return(false);
+			}
+ 			
+ 			function getBlog(){
+ 				var jsonData = {
+					"blogId" : blogId,
+				};
+				console.log("打印出博客编号");
+				console.log(blogId);
+				$.ajax({
+					xhrFields: {
+      				withCredentials: true  
+   				},
+   				crossDomain: true,
+   			//	async: false,              //ajax执行同步操作
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/article/detail",
+				data : jsonData,
+				success : function(result) {
+					console.log(result);
+					if (result.code == 200) {
+						//查询博客信息成功
+						var title=result.blogVO.blog.title;
+						var content=result.blogVO.blog.content;
+						category=result.blogVO.classify.id;
+						$("#title").val(title);
+ 						$("#my-editormd-markdown-doc").text(content);
+ 						$("#category").val(category);
+					} else {
+						//查询博客信息失败：该博客已被删除
+						swal("查询失败!", result.msg, "error");
+					}
+				}
+				});
+ 			}
+ 			
+ 			function getCategory(){
+ 				$("#category").empty();
+  	 			var jsonData = {
+					"userId" : userId,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   					crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/category/all",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+						console.log(result);
+						var length=result.classifyList.length;
+						var categoryItem="";
+						for(var i=0;i<length;i++){
+							categoryItem=categoryItem+"<option value='"+result.classifyList[i].id+"'>"+result.classifyList[i].name+"</option>";
+						}
+						$("#category").append(categoryItem);
+						}else {
+							swal("查找失败!", result.msg, "error");
+						}
+
+					}
+
+				});	
+ 			}
+ 			
+ 			 
+ 			function editBlog(){
+ 				var title=$("#title").val();
+ 				var len=title.length;
+ 				if(len>100){
+ 					swal("提交失败!", "文章标题不能超过100个字符!", "error");
+ 				}else{
+ 					var content=$("#my-editormd-html-code").val();
+ 					var classifyid=$("#category").val();
+ 					var jsonData = {
+ 						"id" : blogId,
+ 						"title" : title,
+ 						"content" : content,
+ 						"userid" : userId,
+						"classifyid" : classifyid,
+					};
+					$.ajax({
+						xhrFields: {
+      						 withCredentials: false    // 前端设置是否带cookie
+   						},
+   						crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+						type : "POST",
+						url : "http://127.0.0.1:8080/blog/article/update",
+						data : jsonData,
+						success : function(result) {
+							if (result.code == 200) {
+								swal("成功!", "修改博客成功!", "success");
+								$('button, .confirm').click(function () {
+        							window.location.reload();
+								})
+							}else {
+								swal("失败!", "添加博客失败!", "error");
+							}
+
+					}
+
+				});	
+ 			}
+ 			}
+ 			 
+ 			function getUser(){
+  	 			$.ajax({
+					xhrFields: {
+      					 withCredentials: true  
+   					},
+   				crossDomain: true,
+   				async: false,              //ajax执行同步操作
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/user/getId",
+				success : function(result) {
+					if (result.code == 200) {
+						userId=result.id;	
+					}else{
+						swal(result.msg,'点击进行登录', "error");
+						$('button, .confirm').click(function () {
+        					location.href = 'login.html'
+						})	
+					}
+				}
+
+				});
+  	 		} 
+ 			
+		</script>
+	</body>
+</html>

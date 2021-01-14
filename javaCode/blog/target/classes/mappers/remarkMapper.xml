@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.dao.RemarkDao">
+	<resultMap id="remarkMap" type="com.blog.entity.Remark">
+		<id column="id" property="id"  />
+		<result column="comment" property="comment"  />
+		<result column="time" property="time"  />
+		<result column="attitude" property="attitude"  />
+		<result column="userid" property="userid"  />
+		<result column="blogid" property="blogid"  />
+	</resultMap>
+	<!-- 根据id查找用户关注的人数 -->
+	<select id="queryRemark" parameterType="int" resultMap="remarkMap">
+		select * from remark where blogid=#{blogId} order by time desc
+	</select>
+	<!-- 增加一条评论信息-->
+	<insert id="addRemark" parameterType="com.blog.entity.Remark">
+		insert into remark(comment,time,attitude,userid,blogid) value(#{comment},#{time},#{attitude},#{userid},#{blogid})
+	</insert>
+	<!-- 删除指定博客的所有评论信息 -->
+	<delete id="deleteRemark" parameterType="int">
+		delete from remark where blogid=#{blogId}
+	</delete>
+</mapper> 

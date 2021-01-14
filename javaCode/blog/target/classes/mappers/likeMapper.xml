@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.dao.LikeDao">
+	<resultMap id="likeMap" type="com.blog.entity.Like">
+		<id column="id" property="id"  />
+		<result column="userid" property="userid"  />
+		<result column="blogid" property="blogid"  />
+	</resultMap>
+	<!-- 查找指定用户对指定博客的点赞情况 -->
+	<select id="queryLike" resultMap="likeMap">
+		select * from bloglike where userid=#{userId} and blogid=#{blogId} 
+	</select>
+	<!-- 增加一条点赞信息-->
+	<insert id="insertLike">
+		insert into bloglike(userid,blogid) value(#{userId},#{blogId})
+	</insert>
+	<!-- 取消点赞 -->
+	<delete id="deleteLike">
+		delete from bloglike where userid=#{userId} and blogid=#{blogId}
+	</delete>
+	<!-- 删除指定博客的所有点赞记录 -->
+	<delete id="deleteLikes" parameterType="int">
+		delete from bloglike where blogid=#{blogId}
+	</delete>
+	
+</mapper> 

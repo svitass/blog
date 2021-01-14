@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Young Blog -- 个人中心</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Custom styles for this template -->
+  <link href="../css/modern-business.css" rel="stylesheet">
+  
+  <!--<link href="../css/sweetalert.css" rel="stylesheet">-->
+
+</head>
+
+<body>
+
+ <!-- Navigation -->
+  <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Young Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+        	<li>
+        		<!-- Search -->
+      			<div class="input-group">
+              <input type="text" id="search" class="form-control" placeholder="Search for...">
+              <span class="input-group-btn">
+                <button class="btn btn-secondary" type="button" onclick="search();">Go!</button>
+              </span>
+            </div>
+        	</li>
+        	<li><span class="col-10"></span></li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">首页</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="login.html">登录</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="bloger.html">个人中心</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="blog-add.html">写文章</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div id="indexBlogs" class="container userinfo content-height">
+  		<ul id="userinfo" class="list-group">
+  		<form method="post" enctype="multipart/form-data" id="form">
+    	<li class="list-group-item">
+    		<img id="picture" class="img-circle" />
+    		<input type="file" allowexts="gif,jpeg,jpg,png,bmp" class="userinfo-item" id="ImgFile" onchange="uploadImage(this);" />
+    	</li>
+    	</form>
+    	<li class="list-group-item">
+    		<label>昵称</label>
+    		<input type="text" id="name" class="userinfo-item"/>
+    		<label id="name-tip" class="tip"></label>
+    	</li>
+    	<li class="list-group-item">
+    		<label>手机</label>
+    		<input type="text" id="phone" class="userinfo-item" disabled="disabled" />
+    	</li>
+    	<li class="list-group-item">
+    		<label>邮箱</label>
+    		<input  type="email" id="email" class="userinfo-item"/>
+    		<label id="email-tip" class="tip"></label>
+    	</li>
+    	<li class="list-group-item">
+    		<label>注册时间</label>
+    		<input type="text" id="registertime" class="userinfo-item1" disabled="disabled"/>
+    	</li>
+    	<li class="list-group-item">
+    		<label>个人简介</label>
+    		<textarea id="description" class="userinfo-item1"></textarea>
+    		<label id="description-tip" class="tip"></label>
+    	</li>
+    	<li class="list-group-item">
+    		<input type="submit" value="保存" class="submit-btn" onClick="updateUser();"/>
+    	</li>
+	</ul>
+	
+  </div>
+  <!-- /.container -->
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; Your Website 2019</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="../js/jquery.min.js"></script>
+  <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+	<!--<script src="../js/sweetalert.min.js"></script>-->
+  <script type="text/javascript">
+  	$(function(){
+  		getUser();
+  		/*var id=GetQueryString("id");
+		if(id !=null && id.toString().length>0)
+		{
+   			getUser(id);
+		}*/
+  	});
+  	/**
+  	 * 获取url参数
+  	 * @param {Object} name
+  	 */
+  	function GetQueryString(name)
+		{
+    	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+     	var r = window.location.search.substr(1).match(reg);
+     	if(r!=null)return  unescape(r[2]); return null;
+		}
+	
+		$("#name").bind('input propertychange', function()   //验证用户名
+		{
+  		var name=$("#name").val();
+			var length=name.length;
+			if(length==0){
+				$("#name-tip").text("*用户名不能为空");
+			}else if(length>16){
+				$("#name-tip").text("*用户名长度不能超过16个字符");
+			}else{
+				$("#name-tip").text("");
+			}
+		})
+		
+		$("#email").bind('input propertychange', function()   //验证邮箱
+		{
+  		var email=$("#email").val();
+  		var len=email.length;
+  		if(len<18){
+  			var myreg = /^([\.a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
+				if(!myreg.test(email)){
+           $("#email-tip").text("*请输入正确的邮箱");
+        }else{
+        	$("#email-tip").text("");
+        }
+  		}else{
+  			$("#email-tip").text("*邮箱长度不能超过18个字符");
+  		}
+			
+			
+		})
+	
+	$("#description").bind('input propertychange', function()   //验证邮箱
+		{
+  		var description=$("#description").val();
+			var length=description.length;
+			if(length>250){
+				$("#description-tip").text("*个人简介不能超过250个字符");
+			}else{
+				$("#description-tip").text("");
+			}
+		})
+	
+	
+	function updateUser(){
+		var nametip=$("#name-tip").text();
+		var emailtip=$("#email-tip").text();
+		var descriptiontip=$("#description-tip").text();
+		if(nametip.length!=0){
+			swal("提交失败!", "请输入正确的用户名", "error");
+		}else if(emailtip.length!=0){
+			swal("提交失败!", "请输入正确的邮箱", "error");
+		}else if(descriptiontip.length!=0){
+			swal("提交失败!", "个人简介过长", "error");
+		}else{
+			var name=$("#name").val();
+			var phone=$("#phone").val();
+			var email=$("#email").val();
+			var description=$("#description").val();
+			var jsonData = {
+				"name" : name,
+				"phone" : phone,
+				"email" : email,
+				"description" : description,
+			};
+			$.ajax({
+				xhrFields: {
+      			withCredentials: true  
+   			},
+   			crossDomain: true,
+   			async: false,              //ajax执行同步操作
+				type : "POST",
+				url : "http://127.0.0.1:8080/blog/user/update",
+				data : jsonData,
+				success : function(result) {
+				if (result.code == 200) {
+					//查询用户信息成功
+					swal("成功!","修改个人信息成功","success");
+					//getUser();
+				} else {
+					swal("修改失败!", result.msg, "error");
+				}
+						
+			}
+
+		});
+		}
+		
+	}
+	
+	/*function getUser(){
+		$("#userinfo").empty();
+  	 	$.ajax({
+			xhrFields: {
+      			withCredentials: true  
+   			},
+   			crossDomain: true,
+   			async: false,              //ajax执行同步操作
+			type : "POST",
+			url : "http://127.0.0.1:8080/blog/user/personal",
+			success : function(result) {
+			if (result.code == 200) {
+				//查询用户信息成功
+				var user="<li class='list-group-item'>"
+					+"<img src='"+result.userVO.user.image+"' class='img-circle' />"
+					+"<input type='file' value='更新头像' class='userinfo-item' />"
+					+"</li>"
+					+"<li class='list-group-item'>"
+					+"<label>昵称</label>"
+					+"<input type='text' id='name' value='"+result.userVO.user.name+"' class='userinfo-item' />"
+					+"</li>"
+					+"<li class='list-group-item'>"	
+					+"<label>手机</label>"
+					+"<input type='text' id='phone' value='"+result.userVO.user.phone+"' class='userinfo-item' disabled='disabled' />"
+					+"</li>"
+					+"<li class='list-group-item'>"
+					+"<label>邮箱</label>"
+					+"<input  type='email' id='email' value='"+result.userVO.user.email+"' class='userinfo-item'/>"
+					+"</li>"   
+					+"<li class='list-group-item'>"
+					+"<label>注册时间</label>"
+					+"<input type='text' id='registertime' value='"+result.userVO.user.registertime+"' class='userinfo-item1' disabled='disabled'/>"
+    				+"</li>"
+    				+"<li class='list-group-item'>"
+    				+"<label>个人简介</label>"
+    				+"<textarea id='description' class='userinfo-item1'>"+result.userVO.user.description+"</textarea>"
+    				+"</li>"
+    				+"<li class='list-group-item'>"
+    				+"<input type='submit' value='保存' class='submit-btn' onClick='updateUser();' />"
+    				+"</li>";
+    				$("#userinfo").append(user);
+			} else {
+				swal(result.msg,'点击进行登录', "error");
+				$('button, .confirm').click(function () {
+        			location.href = 'login.html'
+				})
+			}
+						
+		}
+
+	});
+  }*/
+ 
+ 	function getUser(){
+  	 	$.ajax({
+			xhrFields: {
+      			withCredentials: true  
+   			},
+   		crossDomain: true,
+   		async: false,              //ajax执行同步操作
+			type : "POST",
+			url : "http://127.0.0.1:8080/blog/user/personal",
+			success : function(result) {
+			if (result.code == 200) {
+				//查询用户信息成功
+				$("#picture").attr("src",result.userVO.user.image);
+				$("#name").val(result.userVO.user.name);
+				$("#phone").val(result.userVO.user.phone);
+				$("#email").val(result.userVO.user.email);
+				$("#registertime").val(result.userVO.user.registertime);
+				$("#description").val(result.userVO.user.description);
+			} else {
+				swal(result.msg,'点击进行登录', "error");
+				$('button, .confirm').click(function () {
+        			location.href = 'login.html'
+				})
+			}
+						
+		}
+
+	});
+  }
+ 	
+ 		/*
+ 		 * 上传图片
+ 		 */
+ 	  function uploadImage() {
+ 	  		var animateimg = $("#ImgFile").val(); //获取上传的图片名 
+    		var imgarr=animateimg.split('\\'); //分割
+    		var myimg=imgarr[imgarr.length-1]; //去掉 // 获取图片名
+    		var houzui = myimg.lastIndexOf('.'); //获取 . 出现的位置
+    		var ext = myimg.substring(houzui, myimg.length).toUpperCase();  //切割 . 获取文件后缀
+    
+    		var file = $('#ImgFile').get(0).files[0]; //获取上传的文件
+    		var fileSize = file.size;           //获取上传的文件大小
+    		var maxSize = 1048576;              //最大1MB
+    		if(ext !='.PNG' && ext !='.GIF' && ext !='.JPG' && ext !='.JPEG' && ext !='.BMP'){
+        	//parent.layer.msg('文件类型错误,请上传图片类型');
+        	swal("文件类型错误!", "请上传图片类型", "error");
+        	return false;
+    		}else if(parseInt(fileSize) >= parseInt(maxSize)){
+        	//parent.layer.msg('上传的文件不能超过1MB');
+        	swal("文件过大!", "上传的图片不能超过1MB", "error");
+        	return false;
+    		}else{  
+    			var formData=new FormData();
+        	var data=document.getElementById("ImgFile").files[0];
+        	formData.append("file",data);
+        	console.log(formData);
+        	$.ajax({
+        		xhrFields: {
+      				withCredentials: true  
+   					},
+   					crossDomain: true, 
+            type: "POST",
+            url: "http://127.0.0.1:8080/blog/user/image",
+            data: formData,  
+            async: false,
+            processData: false,  
+            contentType: false,
+            success : function(result) {
+						if (result.code == 200) {
+							console.log(result);
+							console.log("打印出图片上传地址");
+							console.log(result.url);
+							$("#picture").attr("src",result.url);
+						} else {
+							swal('更改头像失败',result.msg, "error");
+						}
+						
+						}
+				});
+    	}
+   }
+
+ 	function search(){
+			var key=$("#search").val();
+			console.log(key);
+			searchBlogs(key,1);
+		}
+		
+		function searchBlogs(key,pageNum){   //搜索博客
+				$("#indexBlogs").empty();
+				var jsonData = {
+					"key" : key,
+					"pageNum" : pageNum,
+				};
+				$.ajax({
+					xhrFields: {
+      					 withCredentials: false    // 前端设置是否带cookie
+   					},
+   				crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+					type : "POST",
+					url : "http://127.0.0.1:8080/blog/article/search",
+					data : jsonData,
+					success : function(result) {
+						if (result.code == 200) {
+							console.log(result);
+							$("#indexBlogs").append("<br />");
+							var blogs=result.page.list;
+							var length=blogs.length;
+							for(var i=0;i<length;i++){
+								var blogItem="<div class='card mb-4'><div class='card-body'><div class='row'>"
+								+"<div class='col-lg-12'><h2 class='card-title'>"+blogs[i].blog.title+"</h2>";
+					//			+"<div class='col-lg-6'><a href='#'><img class='img-fluid rounded' src='http://placehold.it/750x300' alt=''></a></div>"
+								var content=blogs[i].blog.content;
+								content=content.replace(/!\[\]\(.*?\)/,"");  //删除图片路径
+								content=content.replace(/#/g,""); 
+								var blogLength=content.length;
+								if(blogLength>100){
+									content=content.substring(0,100);
+									content=content+"...";
+								}
+								blogItem=blogItem+"<p class='card-text'>"+content+"</p>"
+								+"<a href='blog-post.html?blogId="+blogs[i].blog.id+"' class='btn btn-primary'>Read More &rarr;</a>"
+								+"</div></div></div>"
+								+"<div class='card-footer text-muted'>"+blogs[i].blog.time+"&nbsp;|&nbsp;<a href='#'>"+blogs[i].blogger.name+"</a>"
+								+"&nbsp;|&nbsp;<img src='../img/dianzan_before.png' class='icon-size'/>&nbsp;"+blogs[i].blog.likeCount+"&nbsp;|&nbsp;<img src='../img/view.png' width='30'/>"+blogs[i].blog.scanCount
+								+"&nbsp;|&nbsp;<img src='../img/comment.png' class='icon-size'/>&nbsp;"+blogs[i].blog.remarkCount+"</div></div>";
+								$("#indexBlogs").append(blogItem);
+							}
+							var d=parseInt(pageNum)-1;
+							var s=parseInt(pageNum)+1;
+							var pagination="<ul class='pagination justify-content-center mb-4'>";
+							if(d<result.page.firstPage){
+								pagination=pagination+"<li class='page-item disabled'><a class='page-link' href='#'>&larr; Older</a></li>";
+							}else{
+								pagination=pagination+"<li class='page-item'><a class='page-link' href='#' onClick='getBlogs("+key+","+d+");'>&larr; Older</a></li>";
+							}
+							if(s>result.page.lastPage){
+								pagination=pagination+"<li class='page-item disabled'><a class='page-link' href='#'>Newer &rarr;</a></li>";
+							}else{
+								pagination=pagination+"<li class='page-item'><a class='page-link' href='#' onClick='getBlogs("+key+","+s+");'>Newer &rarr;</a></li>";
+							}
+							$("#indexBlogs").append(pagination);
+						}else {
+							swal("失败!", "查找博客信息失败", "error");
+						}
+
+					}
+				});	
+		}
+
+  </script>
+</body>
+
+</html>

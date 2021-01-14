@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.dao.ClassifyDao">
+	<resultMap id="classifyMap" type="com.blog.entity.Classify">
+		<id column="id" property="id"  />
+		<result column="name" property="name"  />
+		<result column="description" property="description"  />
+		<result column="userid" property="userid"  />
+	</resultMap>
+	<!-- 查看指定用户的博客类别  -->
+	<select id="queryClassify" parameterType="int" resultMap="classifyMap">
+		select * from classify where userid=#{userid}
+	</select>
+	<!-- 根据类别名和用户id查找类别 -->
+	<select id="queryClassifyByName" resultMap="classifyMap">
+		select * from classify where name=#{name} and userid=#{userid}
+	</select>
+	<!-- 增加一条类别信息-->
+	<insert id="insertClassify" parameterType="com.blog.entity.Classify">
+		insert into classify(name,description,userid) value(#{name},#{description},#{userid})
+	</insert>
+	<!-- 修改类别信息 -->
+	<update id="updateClassify" parameterType="com.blog.entity.Classify">
+		update classify set name=#{name},description=#{description} where id=#{id}
+	</update>
+	<!-- 删除指定类别信息 -->
+	<delete id="deleteClassify" parameterType="int">
+		delete from classify where id=#{id}
+	</delete>
+	<!-- 根据类别id查找类别 -->
+	<select id="queryClassifyById" resultMap="classifyMap">
+		select * from classify where id=#{id}
+	</select>
+</mapper> 
